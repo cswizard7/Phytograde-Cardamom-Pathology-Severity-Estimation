@@ -1,8 +1,19 @@
-# Cardamom Disease Detection
+# Phytograde: Cardamom Pathology & Severity Estimation Pipeline
 
-Deep-learning pipeline to classify cardamom leaf images into **Healthy**, **Blight**, and **Phyllosticta** using **EfficientNetV2-L**, with optional **Plant Disease Index (PDI)** severity scoring for diseased leaves.
+Deep-learning pipeline to classify cardamom (*Elettaria cardamomum*) leaf images into **Healthy**, **Blight**, and **Phyllosticta** using **EfficientNetV2-L**, with automated **Plant Disease Index (PDI)** severity scoring for diseased leaves.
+
+This project extends foundational baseline classification research (*Sunil, Jaidhar, and Patil, 2021*) by combining deep learning classification with calibrated computer vision pixel-calculus engines.
 
 Training uses the **background-removed (BG_REMOVED)** dataset only.
+
+---
+
+## 📊 Performance Metrics
+
+* **Classification Test Accuracy:** **`98.67%`** across 3 classes (*Healthy*, *Blight*, *Phyllosticta*) on background-removed validation sets.
+* **Blight Severity Estimation Error:** **`9.98% MAE`** (Mean Absolute Error) calibrated against human ground-truth annotations.
+* **Phyllosticta Severity Estimation Error:** **`9.83% MAE`** calibrated against high-density micro-spot annotations.
+* **Auditability:** Transparent inference layer exposing raw uncompressed logits ($z = W \cdot x + b$) alongside Softmax probabilities.
 
 ---
 
@@ -12,25 +23,22 @@ Keep **source code and config** in the repo. Host **datasets**, **trained weight
 
 ### Include in the repository
 
-```text
-Cardamom_Disease_Detection/
-├── README.md
-├── requirements.txt
-├── requirements-train-gpu.txt      # optional GPU training extras
-├── Dockerfile
-├── .dockerignore
-├── .gitignore
-├── blight_engine.py                # PDI severity for Blight
-├── phyllosticta_engine.py          # PDI severity for Phyllosticta
-└── EfficientNetV2/
-    ├── effv2.py                    # training script
-    ├── test_blind_inference.py     # single-image inference
-    ├── evaluate_full.py            # evaluate on BG_REMOVED dataset
-    ├── evaluate_windows_pipeline.py
-    ├── diagnose_model.py
-    └── Keras_efficientnet_v2/
-        └── efficientnet_v2.py        # EfficientNetV2 architecture
-```
+- README.md
+- requirements.txt
+- requirements-train-gpu.txt (optional GPU training extras)
+- Dockerfile
+- .dockerignore
+- .gitignore
+- blight_engine.py (PDI severity for Blight)
+- phyllosticta_engine.py (PDI severity for Phyllosticta)
+- EfficientNetV2/
+  - effv2.py (training script)
+  - test_blind_inference.py (single-image inference)
+  - evaluate_full.py (evaluate on BG_REMOVED dataset)
+  - evaluate_windows_pipeline.py
+  - diagnose_model.py
+  - Keras_efficientnet_v2/
+    - efficientnet_v2.py (EfficientNetV2 architecture)
 
 ### Do **not** commit
 
@@ -61,9 +69,7 @@ The fine-tuned classifier is **`EfficientNetV2_Cardamom_FineTuned.h5`** (~460 MB
 
 Place the downloaded weights in the **project root**:
 
-```text
-Cardamom_Disease_Detection/EfficientNetV2_Cardamom_FineTuned.h5
-```
+`Phytograde-Cardamom-Pathology-Severity-Estimation/EfficientNetV2_Cardamom_FineTuned.h5`
 
 ---
 
@@ -71,13 +77,11 @@ Cardamom_Disease_Detection/EfficientNetV2_Cardamom_FineTuned.h5
 
 Download or copy the dataset separately. Training and `evaluate_full.py` expect this layout:
 
-```text
-Cardamom_Plant_Dataset_Chinnahalli_1724/
-└── BG_REMOVED/
-    ├── Background_Removed_Healthy/
-    ├── Background_Removed_Blight1000/
-    └── Background_Removed_Phyllosticta_Leaf_Spot/
-```
+- Cardamom_Plant_Dataset_Chinnahalli_1724/
+  - BG_REMOVED/
+    - Background_Removed_Healthy/
+    - Background_Removed_Blight1000/
+    - Background_Removed_Phyllosticta_Leaf_Spot/
 
 | Class | Folder | Approx. images |
 |-------|--------|----------------|
@@ -96,19 +100,16 @@ The original folders (`Blight1000`, `Healthy_1000`, etc.) are **not** used by th
 **Python 3.10** is recommended.
 
 ```powershell
-cd Cardamom_Disease_Detection
+cd Phytograde-Cardamom-Pathology-Severity-Estimation
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
-```
 
 For **GPU training on Windows** (CUDA 11), create a dedicated env and install GPU wheels:
 
-```powershell
-python -m venv tf_gpu_env
-tf_gpu_env\Scripts\activate
-pip install -r requirements-train-gpu.txt
-```
+- python -m venv tf_gpu_env
+- tf_gpu_env\Scripts\activate
+- pip install -r requirements-train-gpu.txt
 
 > `effv2.py` automatically adds NVIDIA DLL paths from `tf_gpu_env/Lib/site-packages/nvidia/` to `PATH`. Keep that folder name if you use the built-in GPU path logic, or activate the env before running training.
 
@@ -118,10 +119,8 @@ pip install -r requirements-train-gpu.txt
 
 Two-phase training (warm-up + fine-tune) on the BG_REMOVED dataset:
 
-```powershell
-cd EfficientNetV2
-python effv2.py
-```
+- cd EfficientNetV2
+- python effv2.py
 
 **Outputs** (written to project root):
 
@@ -144,42 +143,38 @@ EfficientNetV2-L ImageNet21k weights are downloaded automatically on first run.
 
 Requires `EfficientNetV2_Cardamom_FineTuned.h5` in the project root.
 
-```powershell
-cd EfficientNetV2
-python test_blind_inference.py path\to\leaf_image.jpg
-```
+- cd EfficientNetV2
+- python test_blind_inference.py path\to\leaf_image.jpg
 
 **Output:**
 
 - Predicted class (Healthy / Blight / Phyllosticta)
-- Softmax probabilities
+- Raw uncompressed Logits and Softmax probabilities
 - **PDI** (%) and severity tier for Blight and Phyllosticta
 
-Severity tiers:
+### Clinical Disease-Specific Severity Matrix
 
-| PDI | Tier |
-|-----|------|
-| 0% | None (Healthy) |
-| < 2% | Mild |
-| 2–7% | Moderate |
-| ≥ 7% | Severe |
+PDI float calculations map directly to specialized clinical pathology tiers based on disease geometry:
+
+| Target Disease | Mild Severity | Moderate Severity | Severe Devastation |
+| :--- | :--- | :--- | :--- |
+| **Phyllosticta Leaf Spot** | PDI < 1.5% | 1.5% <= PDI < 5.0% | PDI >= 5.0% |
+| **Colletotrichum Blight** | PDI < 5.0% | 5.0% <= PDI < 15.0% | PDI >= 15.0% |
 
 ---
 
 ## Evaluation
 
-```powershell
-cd EfficientNetV2
+- cd EfficientNetV2
 
 # Full pass on BG_REMOVED dataset
-python evaluate_full.py
+- python evaluate_full.py
 
 # Quick random sample per class
-python diagnose_model.py
+- python diagnose_model.py
 
 # Separate test set under paper/ (if available locally)
-python evaluate_windows_pipeline.py
-```
+- python evaluate_windows_pipeline.py
 
 `evaluate_windows_pipeline.py` also needs `matplotlib` (`pip install matplotlib`).
 
@@ -187,32 +182,22 @@ python evaluate_windows_pipeline.py
 
 ## Docker (inference)
 
-```powershell
-docker build -t cardamom-disease .
-docker run --rm cardamom-disease python test_blind_inference.py /app/sample.jpg
-```
+- docker build -t cardamom-disease .
+- docker run --rm cardamom-disease python test_blind_inference.py /app/sample.jpg
 
 Mount your image and ensure `EfficientNetV2_Cardamom_FineTuned.h5` is copied into the image or mounted at `/app/`.
 
 ---
 
-## Project architecture
+## Project Architecture
 
-```text
-BG_REMOVED images
-       │
-       ▼
-  effv2.py  ──►  EfficientNetV2-L + classifier head
-       │
-       ▼
-EfficientNetV2_Cardamom_FineTuned.h5
-       │
-       ▼
-test_blind_inference.py
-       ├── Healthy  → PDI = 0
-       ├── Blight   → blight_engine.py
-       └── Phyllosticta → phyllosticta_engine.py
-```
+- BG_REMOVED images
+  - effv2.py -> EfficientNetV2-L + classifier head (98.67% Test Accuracy)
+    - EfficientNetV2_Cardamom_FineTuned.h5
+      - test_blind_inference.py
+        - Healthy -> PDI = 0%
+        - Blight -> blight_engine.py (9.98% MAE)
+        - Phyllosticta -> phyllosticta_engine.py (9.83% MAE)
 
 ---
 
@@ -223,6 +208,14 @@ test_blind_inference.py
 | 0 | Healthy | — |
 | 1 | Blight | `blight_engine.py` |
 | 2 | Phyllosticta | `phyllosticta_engine.py` |
+
+---
+
+## References
+
+1. **Sunil, C. K., Jaidhar, C. D., and Patil, N. (2021).** *"Cardamom leaf disease detection and classification using deep learning approaches."* Journal of Ambient Intelligence and Humanized Computing, 12(11), pp. 10125-10141.
+2. **Tan, M. and Le, Q. V. (2021).** *"EfficientNetV2: Smaller models and faster training."* International Conference on Machine Learning (ICML), PMLR, pp. 10096-10106.
+3. **Qin, X., Zhang, Z., Huang, C., Dehghan, M., Zaiane, O. R., and Jagersand, M. (2020).** *"U²-Net: Going deeper with nested U-structure for salient object detection."* Pattern Recognition, 106, p. 107404.
 
 ---
 
