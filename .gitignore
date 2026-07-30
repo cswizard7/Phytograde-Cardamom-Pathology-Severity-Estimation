@@ -1,0 +1,23 @@
+# Virtual Environments
+.venv/
+venv310/
+tf_gpu_env/
+
+# Datasets & Heavy Archives
+Cardamom_Plant_Dataset_Chinnahalli_1724/
+*.zip
+*.tar
+*.h5
+*.keras
+
+# Renders, Visuals & Debugs
+*.png
+*.csv
+*_debug.png
+
+# System & IDE
+__pycache__/
+*.pyc
+.vscode/
+.idea/
+.DS_Store
