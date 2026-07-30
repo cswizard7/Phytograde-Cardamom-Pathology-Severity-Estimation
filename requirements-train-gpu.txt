@@ -1,0 +1,16 @@
+# Optional GPU training stack (Windows / CUDA 11).
+# Use this instead of requirements.txt when training with effv2.py on a GPU machine.
+# Inference works with requirements.txt alone.
+
+-r requirements.txt
+
+# Pin to TF 2.10.x if you rely on the bundled CUDA 11 pip wheels below.
+# tensorflow==2.10.1
+
+nvidia-cublas-cu11
+nvidia-cuda-nvrtc-cu11
+nvidia-cuda-runtime-cu11
+nvidia-cudnn-cu11
+nvidia-curand-cu11
+nvidia-cusolver-cu11
+nvidia-cusparse-cu11
