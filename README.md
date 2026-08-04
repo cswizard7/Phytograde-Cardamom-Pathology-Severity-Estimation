@@ -61,13 +61,11 @@ Keep **source code and config** in the repo. Host **datasets**, **trained weight
 
 ### Trained model weights
 
-The fine-tuned classifier is **`EfficientNetV2_Cardamom_FineTuned.h5`** (~460 MB). Because it exceeds GitHub’s file-size limit, use one of:
+The fine-tuned classifier is **`EfficientNetV2_Cardamom_FineTuned.h5`** (~460 MB). Because it exceeds GitHub’s standard file-size limit, it is hosted as an official release asset.
 
-1. **[Git LFS](https://git-lfs.com/)** — track `*.h5` in LFS
-2. **GitHub Releases** — attach the `.h5` as a release asset
-3. **Google Drive / Hugging Face** — link the download URL in this README
+* **Direct Download:** [Download `EfficientNetV2_Cardamom_FineTuned.h5`](https://github.com/cswizard7/Phytograde-Cardamom-Pathology-Severity-Estimation/releases/download/v1.0.0/EfficientNetV2_Cardamom_FineTuned.h5)
 
-Place the downloaded weights in the **project root**:
+Place the downloaded weights file directly in the **project root**:
 
 `Phytograde-Cardamom-Pathology-Severity-Estimation/EfficientNetV2_Cardamom_FineTuned.h5`
 
